@@ -1,0 +1,37 @@
+Before proceeding with the solution, I'd like to point out that optimizing for expected rank is probably not the healthiest option. It determines suitability with regard to who is better or worse, but is completely agnostic to the degree to which candidates are better or worse. Optimizing in terms of an objective "quality score" or "match score" would almost certainly lead to a better marriage on average.
+
+The method for selecting the best suitor (on average) is as follows:
+- Pass on the first 3 suitors.
+- If the 4th suitor is better than all the previous 3, accept the proposal. Otherwise pass.
+- If the 5th suitor is better than all the previous 4, accept the proposal. Otherwise pass.
+- If the 6th suitor ranks in the top 2 of the 6 that you have seen so far, accept the proposal. Otherwise pass.
+- If the 7th suitor ranks in the top 2 of the 7 that you have seen so far, accept the proposal. Otherwise pass.
+- If the 8th suitor ranks in the top 3 of the 8 that you have seen so far, accept the proposal. Otherwise pass.
+- If the 9th suitor ranks in the top 4 of the 9 that you have seen so far, accept the proposal. Otherwise pass.
+
+This method gives an expected suitor rank of 2.558 (as a fraction, 3223/1260). 
+
+Here's how we know this is optimized:
+
+There are 10! ways of ordering the 10 candidates. But let's cast this from the viewpoint of the sultan: she can only see rank with respect to previous candidates. So the 'rank-so-far' (RSF) way of writing the order 8-4-2-5-7-6-9-3-1-10 would be written as
+
+1-1-1-3-4-4-7-2-1-10
+
+One cool feature of this is that each RSF sequence points to exactly one actual rank order. You can reconstruct any rank order from an RSF sequence:
+
+1. Put the '1' in the place of the rightmost '1' in the RSF sequence
+2. If a '2' follows the '1', put the '2' there. Otherwise, put it in the second-to-last '1' position.
+3. If a '3' follows both the '1' and '2', put it in that position. If a '2' comes between the '1' and '2', put the '3' in that position. Otherwise, put the '3' at the position of the 3rd '1' from the right.
+...and so on.
+
+There are also 10! RSF sequences -- 10 options for the last number, 9 for the second to last, and so on. Let's work backwards:
+
+- If the sultan gets to the tenth candidate, her expected rank is 5.5.
+- If the sultan gets to the ninth candidate, passing gives an expected rank of 5.5, and accepting gives an expected rank of r + r/10 = 11r/10 (as there is an r/10 chance that the 10th suitor is better than the ninth), where r is the RSF of that suitor. She should therefore only pass if the RSF for that candidate is 5 or worse (5 is a wash, the next candidate is equally likely to be higher or lower rank). The expected value for coming into the ninth round is therefore 5/9*(5.5) + 1/9*(44/10 + 33/10 + 22/10 + 11/10) = 77/18 = 4.28.
+- 8th round: accepting gives an expected rank of (r + r/9)*11/10 = 11r/9. She should therefore only accept if 11r/9 < 77/18 --> r < 3.5 (i.e. less than or equal to 3). The expected value of coming into this round is then 5/8*(77/18) + 1/8*(33/9 + 22/9 + 11/9) = 517/144 = 3.6.
+- 7th round: accepting gives an expected rank of 11r/8. She accepts if 11r/8 < 517/144 --> r < 2.6 (2 or 1 only). Expected value coming in is 5/7*(517/144) + 1/7*(22/8 + 11/8) = 3179/1008 = 3.2.
+- 6th round: accepting gives 11r/7, so she accepts if 11r/7 < 3179/1008 --> r < 2.007 (2 or 1 only). Expected value coming in is 4/6*(3179/1008) + 1/6*(22/7 + 11/7) = 4367/1512 = 2.9.
+- 5th round: accepting gives 11r/6, so she accepts if 11r/6 < 4367/1512 --> r < 1.6 (1 only). Expected value coming in is 4/5*(4367/1512) + 1/5*11/6 = 506/189 = 2.7.
+- 4th round: accepting gives 11r/5, so she accepts if 11r/5 < 506/189 --> r < 1.2 (1 only). Expected value coming in is 3/4*(506/189) + 1/4*11/5 = 3223/1260 = 2.56.
+- 3rd round: accepting gives 11r/4, so she accepts if 11r/4 < 3223/1260 --> r < 0.93 (accept no one). Expected value coming in is same as round 4.
+- 1st and second rounds: accepting is similarly not worthwhile, and expected rank is unchanged.
